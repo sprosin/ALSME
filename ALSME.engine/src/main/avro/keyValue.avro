@@ -1,0 +1,8 @@
+{"namespace": "com.appanddata.alsme.model.avro",
+  "type": "record",
+  "name": "KeyValue",
+  "fields": [
+    {"name": "key", "type": "string"},
+    {"name": "value",  "type": "string"}
+  ]
+}
