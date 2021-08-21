@@ -1,5 +1,7 @@
 # ALSME - Another LSM Engine
 
+[![Build Status](https://app.travis-ci.com/sprosin/ALSME.svg?branch=master)](https://app.travis-ci.com/sprosin/ALSME)
+
 The idea of this project is to create simple yet powerful log-structured merge-tree
 (LSM) key-value storage.
 
