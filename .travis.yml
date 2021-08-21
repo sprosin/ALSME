@@ -1,4 +1,5 @@
 language: java
+jdk: openjdk15
 
 before_script: cd ALSME.engine
 script: mvn test
