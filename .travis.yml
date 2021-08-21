@@ -1,2 +1,4 @@
 language: java
+
+before_script: cd ALSME.engine
 script: mvn test
