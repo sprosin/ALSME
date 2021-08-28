@@ -3,7 +3,7 @@ package com.appanddata.alsme.engine;
 import java.io.IOException;
 
 public interface IDataLog {
-    void append(String key, String value) throws IOException;
+    void append(String key, MemtableValue value) throws IOException;
 
     void clear();
 

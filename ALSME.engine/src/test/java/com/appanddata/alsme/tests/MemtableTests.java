@@ -2,10 +2,12 @@ package com.appanddata.alsme.tests;
 
 import com.appanddata.alsme.engine.IMemtable;
 import com.appanddata.alsme.engine.Memtable;
+import com.appanddata.alsme.engine.MemtableValue;
 import org.testng.annotations.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 
 public class MemtableTests {
 
@@ -14,21 +16,21 @@ public class MemtableTests {
         IMemtable memtable = new Memtable();
         String key = "key";
         String value = "value";
-        memtable.put(key, value);
+        memtable.put(key, new MemtableValue(value));
         int dataSize = memtable.getDataSize();
-        assertThat(dataSize, equalTo(key.length() + value.length()));
+        assertThat(dataSize, equalTo(key.length() + value.length() + 1));
     }
 
     @Test
     public void updateValueCapacityTest() {
         IMemtable memtable = new Memtable();
         String key = "key";
-        String value = "value";
-        String value2 = "value2";
-        memtable.put(key, value);
-        memtable.put(key, value2);
+        MemtableValue mv1 = new MemtableValue("value");
+        MemtableValue mv2 = new MemtableValue("value2");
+        memtable.put(key, mv1);
+        memtable.put(key, mv2);
         int dataSize = memtable.getDataSize();
-        assertThat(dataSize, equalTo(key.length() + value2.length()));
+        assertThat(dataSize, equalTo(key.length() + mv2.length()));
     }
 
     @Test
@@ -36,18 +38,18 @@ public class MemtableTests {
         IMemtable memtable = new Memtable();
         String key = "key";
         String value = "value";
-        memtable.put(key, value);
+        memtable.put(key, new MemtableValue(value));
         memtable.remove(key);
         int dataSize = memtable.getDataSize();
-        assertThat(dataSize, equalTo(0));
+        assertThat(dataSize, greaterThan(0));
     }
 
-    @Test(expectedExceptions = {IllegalArgumentException.class})
+    @Test
     public void removeMissingKeyTest() {
         IMemtable memtable = new Memtable();
         String key = "key";
         String value = "value";
-        memtable.put(key, value);
+        memtable.put(key, new MemtableValue(value));
         memtable.remove(key);
         memtable.remove(key);
     }

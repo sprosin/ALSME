@@ -5,6 +5,7 @@
  */
 package com.appanddata.alsme.model.avro;
 
+import org.apache.avro.generic.GenericArray;
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.util.Utf8;
 import org.apache.avro.message.BinaryMessageEncoder;
@@ -13,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -4699780223517058684L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"KeyValue\",\"namespace\":\"com.appanddata.alsme\",\"fields\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"value\",\"type\":\"string\"}]}");
+  private static final long serialVersionUID = 5064896459097759954L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"KeyValue\",\"namespace\":\"com.appanddata.alsme.model.avro\",\"fields\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"tombstone\",\"type\":\"boolean\",\"default\":false}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -72,6 +73,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
 
    private java.lang.CharSequence key;
    private java.lang.CharSequence value;
+   private boolean tombstone;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -84,10 +86,12 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
    * All-args constructor.
    * @param key The new value for key
    * @param value The new value for value
+   * @param tombstone The new value for tombstone
    */
-  public KeyValue(java.lang.CharSequence key, java.lang.CharSequence value) {
+  public KeyValue(java.lang.CharSequence key, java.lang.CharSequence value, java.lang.Boolean tombstone) {
     this.key = key;
     this.value = value;
+    this.tombstone = tombstone;
   }
 
   public org.apache.avro.specific.SpecificData getSpecificData() { return MODEL$; }
@@ -97,6 +101,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
     switch (field$) {
     case 0: return key;
     case 1: return value;
+    case 2: return tombstone;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -107,6 +112,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
     switch (field$) {
     case 0: key = (java.lang.CharSequence)value$; break;
     case 1: value = (java.lang.CharSequence)value$; break;
+    case 2: tombstone = (java.lang.Boolean)value$; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -146,11 +152,28 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
   }
 
   /**
+   * Gets the value of the 'tombstone' field.
+   * @return The value of the 'tombstone' field.
+   */
+  public boolean getTombstone() {
+    return tombstone;
+  }
+
+
+  /**
+   * Sets the value of the 'tombstone' field.
+   * @param value the value to set.
+   */
+  public void setTombstone(boolean value) {
+    this.tombstone = value;
+  }
+
+  /**
    * Creates a new KeyValue RecordBuilder.
    * @return A new KeyValue RecordBuilder
    */
-  public static KeyValue.Builder newBuilder() {
-    return new KeyValue.Builder();
+  public static com.appanddata.alsme.model.avro.KeyValue.Builder newBuilder() {
+    return new com.appanddata.alsme.model.avro.KeyValue.Builder();
   }
 
   /**
@@ -158,11 +181,11 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
    * @param other The existing builder to copy.
    * @return A new KeyValue RecordBuilder
    */
-  public static KeyValue.Builder newBuilder(KeyValue.Builder other) {
+  public static com.appanddata.alsme.model.avro.KeyValue.Builder newBuilder(com.appanddata.alsme.model.avro.KeyValue.Builder other) {
     if (other == null) {
-      return new KeyValue.Builder();
+      return new com.appanddata.alsme.model.avro.KeyValue.Builder();
     } else {
-      return new KeyValue.Builder(other);
+      return new com.appanddata.alsme.model.avro.KeyValue.Builder(other);
     }
   }
 
@@ -171,11 +194,11 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
    * @param other The existing instance to copy.
    * @return A new KeyValue RecordBuilder
    */
-  public static KeyValue.Builder newBuilder(KeyValue other) {
+  public static com.appanddata.alsme.model.avro.KeyValue.Builder newBuilder(com.appanddata.alsme.model.avro.KeyValue other) {
     if (other == null) {
-      return new KeyValue.Builder();
+      return new com.appanddata.alsme.model.avro.KeyValue.Builder();
     } else {
-      return new KeyValue.Builder(other);
+      return new com.appanddata.alsme.model.avro.KeyValue.Builder(other);
     }
   }
 
@@ -188,6 +211,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
 
     private java.lang.CharSequence key;
     private java.lang.CharSequence value;
+    private boolean tombstone;
 
     /** Creates a new Builder */
     private Builder() {
@@ -198,7 +222,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(KeyValue.Builder other) {
+    private Builder(com.appanddata.alsme.model.avro.KeyValue.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.key)) {
         this.key = data().deepCopy(fields()[0].schema(), other.key);
@@ -208,13 +232,17 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
         this.value = data().deepCopy(fields()[1].schema(), other.value);
         fieldSetFlags()[1] = other.fieldSetFlags()[1];
       }
+      if (isValidValue(fields()[2], other.tombstone)) {
+        this.tombstone = data().deepCopy(fields()[2].schema(), other.tombstone);
+        fieldSetFlags()[2] = other.fieldSetFlags()[2];
+      }
     }
 
     /**
      * Creates a Builder by copying an existing KeyValue instance
      * @param other The existing instance to copy.
      */
-    private Builder(KeyValue other) {
+    private Builder(com.appanddata.alsme.model.avro.KeyValue other) {
       super(SCHEMA$);
       if (isValidValue(fields()[0], other.key)) {
         this.key = data().deepCopy(fields()[0].schema(), other.key);
@@ -223,6 +251,10 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
       if (isValidValue(fields()[1], other.value)) {
         this.value = data().deepCopy(fields()[1].schema(), other.value);
         fieldSetFlags()[1] = true;
+      }
+      if (isValidValue(fields()[2], other.tombstone)) {
+        this.tombstone = data().deepCopy(fields()[2].schema(), other.tombstone);
+        fieldSetFlags()[2] = true;
       }
     }
 
@@ -240,7 +272,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'key'.
       * @return This builder.
       */
-    public KeyValue.Builder setKey(java.lang.CharSequence value) {
+    public com.appanddata.alsme.model.avro.KeyValue.Builder setKey(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.key = value;
       fieldSetFlags()[0] = true;
@@ -260,7 +292,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
       * Clears the value of the 'key' field.
       * @return This builder.
       */
-    public KeyValue.Builder clearKey() {
+    public com.appanddata.alsme.model.avro.KeyValue.Builder clearKey() {
       key = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -280,7 +312,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'value'.
       * @return This builder.
       */
-    public KeyValue.Builder setValue(java.lang.CharSequence value) {
+    public com.appanddata.alsme.model.avro.KeyValue.Builder setValue(java.lang.CharSequence value) {
       validate(fields()[1], value);
       this.value = value;
       fieldSetFlags()[1] = true;
@@ -300,9 +332,48 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
       * Clears the value of the 'value' field.
       * @return This builder.
       */
-    public KeyValue.Builder clearValue() {
+    public com.appanddata.alsme.model.avro.KeyValue.Builder clearValue() {
       value = null;
       fieldSetFlags()[1] = false;
+      return this;
+    }
+
+    /**
+      * Gets the value of the 'tombstone' field.
+      * @return The value.
+      */
+    public boolean getTombstone() {
+      return tombstone;
+    }
+
+
+    /**
+      * Sets the value of the 'tombstone' field.
+      * @param value The value of 'tombstone'.
+      * @return This builder.
+      */
+    public com.appanddata.alsme.model.avro.KeyValue.Builder setTombstone(boolean value) {
+      validate(fields()[2], value);
+      this.tombstone = value;
+      fieldSetFlags()[2] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'tombstone' field has been set.
+      * @return True if the 'tombstone' field has been set, false otherwise.
+      */
+    public boolean hasTombstone() {
+      return fieldSetFlags()[2];
+    }
+
+
+    /**
+      * Clears the value of the 'tombstone' field.
+      * @return This builder.
+      */
+    public com.appanddata.alsme.model.avro.KeyValue.Builder clearTombstone() {
+      fieldSetFlags()[2] = false;
       return this;
     }
 
@@ -313,6 +384,7 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
         KeyValue record = new KeyValue();
         record.key = fieldSetFlags()[0] ? this.key : (java.lang.CharSequence) defaultValue(fields()[0]);
         record.value = fieldSetFlags()[1] ? this.value : (java.lang.CharSequence) defaultValue(fields()[1]);
+        record.tombstone = fieldSetFlags()[2] ? this.tombstone : (java.lang.Boolean) defaultValue(fields()[2]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -349,6 +421,8 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
 
     out.writeString(this.value);
 
+    out.writeBoolean(this.tombstone);
+
   }
 
   @Override public void customDecode(org.apache.avro.io.ResolvingDecoder in)
@@ -360,8 +434,10 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
 
       this.value = in.readString(this.value instanceof Utf8 ? (Utf8)this.value : null);
 
+      this.tombstone = in.readBoolean();
+
     } else {
-      for (int i = 0; i < 2; i++) {
+      for (int i = 0; i < 3; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
           this.key = in.readString(this.key instanceof Utf8 ? (Utf8)this.key : null);
@@ -369,6 +445,10 @@ public class KeyValue extends org.apache.avro.specific.SpecificRecordBase implem
 
         case 1:
           this.value = in.readString(this.value instanceof Utf8 ? (Utf8)this.value : null);
+          break;
+
+        case 2:
+          this.tombstone = in.readBoolean();
           break;
 
         default:

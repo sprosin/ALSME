@@ -35,7 +35,7 @@ public class SSTableProvider implements ISSTableProvider {
 
     @Override
     public SSTableIndex[] buildSSTables() throws IOException {
-        List<SSTableIndex> ssTableIndices = new ArrayList<SSTableIndex>();
+        List<SSTableIndex> ssTableIndices = new ArrayList<>();
 
         int num = 0;
         String filenameext = filenameFormat.formatted(num);
@@ -56,9 +56,9 @@ public class SSTableProvider implements ISSTableProvider {
     }
 
     @Override
-    public String getValue(String filename, int offset) throws IOException {
-        DatumReader<KeyValue> keyValueDatumReader = new SpecificDatumReader<KeyValue>(KeyValue.class);
-        try (DataFileReader<KeyValue> dataFileReader = new DataFileReader<KeyValue>(new File(filename), keyValueDatumReader)) {
+    public MemtableValue getValue(String filename, int offset) throws IOException {
+        DatumReader<KeyValue> keyValueDatumReader = new SpecificDatumReader<>(KeyValue.class);
+        try (DataFileReader<KeyValue> dataFileReader = new DataFileReader<>(new File(filename), keyValueDatumReader)) {
             int currentOffset = offset;
             long blockSize = dataFileReader.getBlockSize();
             if (blockSize > 0)
@@ -73,11 +73,13 @@ public class SSTableProvider implements ISSTableProvider {
                 currentOffset--;
             }
 
-            if (currentOffset != -1)
+            if (currentOffset != -1 || kv == null)
                 throw new IllegalStateException("requested record with offset %d not found in file %s".formatted(offset, filename));
 
+            if (kv.getTombstone())
+                return MemtableValue.getDeletedValue();
 
-            return kv.getValue().toString();
+            return new MemtableValue(kv.getValue().toString(), kv.getTombstone());
         }
     }
 
@@ -89,8 +91,8 @@ public class SSTableProvider implements ISSTableProvider {
 
         int offset = 0;
 
-        DatumReader<KeyValue> keyValueDatumReader = new SpecificDatumReader<KeyValue>(KeyValue.class);
-        try (DataFileReader<KeyValue> dataFileReader = new DataFileReader<KeyValue>(logFile, keyValueDatumReader)) {
+        DatumReader<KeyValue> keyValueDatumReader = new SpecificDatumReader<>(KeyValue.class);
+        try (DataFileReader<KeyValue> dataFileReader = new DataFileReader<>(logFile, keyValueDatumReader)) {
             KeyValue kv = null;
             while (dataFileReader.hasNext()) {
                 kv = dataFileReader.next(kv);
@@ -107,14 +109,16 @@ public class SSTableProvider implements ISSTableProvider {
     public String saveMemtable(IMemtable memtable) throws IOException {
         String newFilename = generateNewFilename();
 
-        DatumWriter<KeyValue> keyValueDatumWriter = new SpecificDatumWriter<KeyValue>(KeyValue.class);
-        try (DataFileWriter<KeyValue> dataFileWriter = new DataFileWriter<KeyValue>(keyValueDatumWriter)) {
+        DatumWriter<KeyValue> keyValueDatumWriter = new SpecificDatumWriter<>(KeyValue.class);
+        try (DataFileWriter<KeyValue> dataFileWriter = new DataFileWriter<>(keyValueDatumWriter)) {
 
             dataFileWriter.create(KeyValue.getClassSchema(), new File(newFilename));
 
-            for (Map.Entry<String, String> keyValueEntry :
+            for (Map.Entry<String, MemtableValue> keyValueEntry :
                     memtable.entrySet()) {
-                KeyValue kv = new KeyValue(keyValueEntry.getKey(), keyValueEntry.getValue());
+                KeyValue kv = new KeyValue(keyValueEntry.getKey(),
+                        keyValueEntry.getValue().getValue(),
+                        keyValueEntry.getValue().isTombstone());
                 dataFileWriter.append(kv);
             }
         }

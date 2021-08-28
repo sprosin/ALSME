@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 public class StorageEngineTests {
 
@@ -32,8 +33,8 @@ public class StorageEngineTests {
         IStorageEngine engine = new StorageEngine(dataLog, memtable, issTableProvider);
         engine.put("key", "value");
 
-        Mockito.verify(dataLog).append("key", "value");
-        Mockito.verify(memtable).put("key", "value");
+        Mockito.verify(dataLog).append("key", new MemtableValue("value"));
+        Mockito.verify(memtable).put("key", new MemtableValue("value"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -138,5 +139,46 @@ public class StorageEngineTests {
         String newValue = engine.get("key");
 
         assertThat(newValue, equalTo("valuevaluevalue2"));
+    }
+
+    @Test
+    public void removeSimpleTest() throws IOException {
+        IStorageEngine engine = new StorageEngine();
+        engine.clearData();
+
+        engine.put("key", "value");
+        engine.remove("key");
+        String newValue = engine.get("key");
+
+        assertThat(newValue, nullValue());
+    }
+
+    @Test
+    public void removeSSTableTest() throws IOException {
+        IStorageEngine engine = new StorageEngine();
+        engine.clearData();
+        engine.setMemoryDataLimit(50);
+
+        engine.put("key", "valuevaluevaluevaluevaluevaluevaluevaluevalue"); // length 3+45+1
+        engine.remove("key");
+        engine.put("key2", "valuevaluevaluevaluevaluevaluevaluevaluevaluevalue"); // length 3+45+1
+        String newValue = engine.get("key");
+
+        assertThat(newValue, nullValue());
+    }
+
+    @Test
+    public void removeSSTable2ndTest() throws IOException {
+        IStorageEngine engine = new StorageEngine();
+        engine.clearData();
+        engine.setMemoryDataLimit(50);
+
+        engine.put("key", "valuevaluevaluevaluevaluevaluevaluevaluevalue"); // length 3+45+1
+        engine.remove("key");
+        engine.put("key2", "valuevaluevaluevaluevaluevaluevaluevaluevaluevalue"); // length 3+45+1
+        engine.put("key2", "valuevaluevaluevaluevaluevaluevaluevaluevaluevaluevalue"); // length 3+50+1
+        String newValue = engine.get("key");
+
+        assertThat(newValue, nullValue());
     }
 }

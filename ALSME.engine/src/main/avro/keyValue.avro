@@ -3,6 +3,7 @@
   "name": "KeyValue",
   "fields": [
     {"name": "key", "type": "string"},
-    {"name": "value",  "type": "string"}
+    {"name": "value",  "type": "string"},
+    {"name": "tombstone",  "type": "boolean", "default": false}
   ]
 }

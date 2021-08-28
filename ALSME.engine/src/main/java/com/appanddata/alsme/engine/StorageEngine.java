@@ -30,8 +30,10 @@ public class StorageEngine implements IStorageEngine {
         if (value == null)
             throw new IllegalArgumentException("value cannot be null");
 
-        appendToLog(key, value);
-        addToMemtable(key, value);
+        MemtableValue mv = new MemtableValue(value);
+
+        appendToLog(key, mv);
+        addToMemtable(key, mv);
         if (memoryDataLimit > 0 && memtable.getDataSize() >= memoryDataLimit)
             flushMemtable();
     }
@@ -44,11 +46,11 @@ public class StorageEngine implements IStorageEngine {
         dataLog.clear();
     }
 
-    private void addToMemtable(String key, String value) {
+    private void addToMemtable(String key, MemtableValue value) {
         memtable.put(key, value);
     }
 
-    private void appendToLog(String key, String value) throws IOException {
+    private void appendToLog(String key, MemtableValue value) throws IOException {
         dataLog.append(key, value);
     }
 
@@ -58,8 +60,10 @@ public class StorageEngine implements IStorageEngine {
         if (value == null) {
             for (SSTableIndex ssTableIndex :
                     ssTableIndexes) {
-                if (ssTableIndex.containsKey(key))
-                    return issTableProvider.getValue(ssTableIndex.getFilename(), ssTableIndex.get(key));
+                if (ssTableIndex.containsKey(key)) {
+                    MemtableValue mv = issTableProvider.getValue(ssTableIndex.getFilename(), ssTableIndex.get(key));
+                    return mv.isTombstone() ? null : mv.getValue();
+                }
             }
         }
         return value;
@@ -79,10 +83,20 @@ public class StorageEngine implements IStorageEngine {
 
     @Override
     public void recoverState() throws IOException {
-        dataLog.processLogFile((String key, String value) -> {
-            memtable.put(key, value);
+        dataLog.processLogFile((String key, String value, boolean tombstone) -> {
+            memtable.put(key, new MemtableValue(value, tombstone));
         });
         ssTableIndexes.clear();
         ssTableIndexes.addAll(Arrays.asList(issTableProvider.buildSSTables()));
+    }
+
+    @Override
+    public void remove(String key) throws IOException {
+        MemtableValue mv = MemtableValue.getDeletedValue();
+
+        appendToLog(key, mv);
+        addToMemtable(key, mv);
+        if (memoryDataLimit > 0 && memtable.getDataSize() >= memoryDataLimit)
+            flushMemtable();
     }
 }

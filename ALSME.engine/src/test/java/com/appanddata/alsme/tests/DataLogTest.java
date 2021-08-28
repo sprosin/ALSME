@@ -2,6 +2,7 @@ package com.appanddata.alsme.tests;
 
 import com.appanddata.alsme.engine.DataLog;
 import com.appanddata.alsme.engine.IDataLog;
+import com.appanddata.alsme.engine.MemtableValue;
 import org.hamcrest.MatcherAssert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -33,13 +34,13 @@ public class DataLogTest {
 
     @Test
     public void testProcessLogFile() throws IOException {
-        datalog.append("key", "valuevaluevalue");
+        datalog.append("key", new MemtableValue("valuevaluevalue"));
 
         AtomicInteger processedItemsCount = new AtomicInteger();
         AtomicReference<String> returnedKey = new AtomicReference<>();
         AtomicReference<String> returnedValue = new AtomicReference<>();
 
-        datalog.processLogFile((String key, String value) -> {
+        datalog.processLogFile((String key, String value, boolean tombstone) -> {
             processedItemsCount.getAndIncrement();
             returnedKey.set(key);
             returnedValue.set(value);
@@ -53,13 +54,13 @@ public class DataLogTest {
     @Test
     public void testProcessCorruptedLogFile() throws IOException {
         datalog.clear();
-        datalog.append("key", "valuevaluevalue");
+        datalog.append("key", new MemtableValue("valuevaluevalue"));
 
         corruptDataLogFile(filename);
 
         AtomicInteger processedItemsCount = new AtomicInteger();
 
-        datalog.processLogFile((String key, String value) -> {
+        datalog.processLogFile((String key, String value, boolean tombstone) -> {
             processedItemsCount.getAndIncrement();
         });
 
@@ -69,8 +70,8 @@ public class DataLogTest {
     @Test
     public void testProcessCorruptedLogFileWithData() throws IOException {
         datalog.clear();
-        datalog.append("key", "valuevaluevalue");
-        datalog.append("key2", "valuevaluevalue2");
+        datalog.append("key", new MemtableValue("valuevaluevalue"));
+        datalog.append("key2", new MemtableValue("valuevaluevalue2"));
 
         corruptDataLogFile(filename);
 
@@ -78,7 +79,7 @@ public class DataLogTest {
         AtomicReference<String> returnedKey = new AtomicReference<>();
         AtomicReference<String> returnedValue = new AtomicReference<>();
 
-        datalog.processLogFile((String key, String value) -> {
+        datalog.processLogFile((String key, String value, boolean tombstone) -> {
             processedItemsCount.getAndIncrement();
             returnedKey.set(key);
             returnedValue.set(value);

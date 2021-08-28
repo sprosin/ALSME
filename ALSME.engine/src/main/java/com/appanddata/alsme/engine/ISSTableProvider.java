@@ -15,5 +15,5 @@ public interface ISSTableProvider {
 
     SSTableIndex[] buildSSTables() throws IOException;
 
-    String getValue(String filename, int offset) throws IOException;
+    MemtableValue getValue(String filename, int offset) throws IOException;
 }

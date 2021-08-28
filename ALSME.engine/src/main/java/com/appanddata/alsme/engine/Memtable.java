@@ -4,13 +4,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class Memtable implements IMemtable {
-    TreeMap<String, String> treeMap = new TreeMap<String, String>();
+    TreeMap<String, MemtableValue> treeMap = new TreeMap<>();
     private int keysDataSize = 0;
     private int valuesDataSize = 0;
 
 
     @Override
-    public void put(String key, String value) {
+    public void put(String key, MemtableValue value) {
         if (treeMap.containsKey(key)) {
             valuesDataSize -= treeMap.get(key).length();
         } else {
@@ -22,7 +22,8 @@ public class Memtable implements IMemtable {
 
     @Override
     public String get(String key) {
-        return treeMap.get(key);
+        MemtableValue mv = treeMap.get(key);
+        return (mv == null || mv.isTombstone()) ? null : mv.getValue();
     }
 
     @Override
@@ -32,16 +33,11 @@ public class Memtable implements IMemtable {
 
     @Override
     public void remove(String key) {
-        if (treeMap.containsKey(key)) {
-            keysDataSize -= key.length();
-            valuesDataSize -= treeMap.get(key).length();
-            treeMap.remove(key);
-        } else
-            throw new IllegalArgumentException("Key %s doesn't exist".formatted(key));
+        put(key, MemtableValue.getDeletedValue());
     }
 
     @Override
-    public Iterable<? extends Map.Entry<String, String>> entrySet() {
+    public Iterable<? extends Map.Entry<String, MemtableValue>> entrySet() {
         return treeMap.entrySet();
     }
 

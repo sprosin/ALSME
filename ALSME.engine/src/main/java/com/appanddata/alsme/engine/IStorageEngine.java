@@ -12,4 +12,6 @@ public interface IStorageEngine {
     void clearData();
 
     void recoverState() throws IOException;
+
+    void remove(String key) throws IOException;
 }

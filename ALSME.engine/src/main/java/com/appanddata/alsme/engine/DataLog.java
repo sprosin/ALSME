@@ -22,18 +22,18 @@ public class DataLog implements IDataLog {
     }
 
     @Override
-    public void append(String key, String value) throws IOException {
+    public void append(String key, MemtableValue value) throws IOException {
         File logFile = new File(logFilename);
 
-        DatumWriter<KeyValue> keyValueDatumWriter = new SpecificDatumWriter<KeyValue>(KeyValue.class);
-        try (DataFileWriter<KeyValue> dataFileWriter = new DataFileWriter<KeyValue>(keyValueDatumWriter)) {
+        DatumWriter<KeyValue> keyValueDatumWriter = new SpecificDatumWriter<>(KeyValue.class);
+        try (DataFileWriter<KeyValue> dataFileWriter = new DataFileWriter<>(keyValueDatumWriter)) {
 
             if (!logFile.exists())
                 dataFileWriter.create(KeyValue.getClassSchema(), logFile);
             else
                 dataFileWriter.appendTo(logFile);
 
-            KeyValue kv = new KeyValue(key, value);
+            KeyValue kv = new KeyValue(key, value.getValue(), value.isTombstone());
             dataFileWriter.append(kv);
         }
     }
@@ -49,12 +49,12 @@ public class DataLog implements IDataLog {
     public void processLogFile(IKeyValueProcessing keyValueProcessing) throws IOException {
         File logFile = new File(logFilename);
 
-        DatumReader<KeyValue> keyValueDatumReader = new SpecificDatumReader<KeyValue>(KeyValue.class);
-        try (DataFileReader<KeyValue> dataFileReader = new DataFileReader<KeyValue>(logFile, keyValueDatumReader)) {
+        DatumReader<KeyValue> keyValueDatumReader = new SpecificDatumReader<>(KeyValue.class);
+        try (DataFileReader<KeyValue> dataFileReader = new DataFileReader<>(logFile, keyValueDatumReader)) {
             KeyValue kv = null;
             while (dataFileReader.hasNext()) {
                 kv = dataFileReader.next(kv);
-                keyValueProcessing.process(kv.getKey().toString(), kv.getValue().toString());
+                keyValueProcessing.process(kv.getKey().toString(), kv.getValue().toString(), kv.getTombstone());
             }
         }
     }
